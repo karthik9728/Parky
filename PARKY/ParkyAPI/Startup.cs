@@ -16,6 +16,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ParkyAPI.Mapper;
+using System.Reflection;
+using System.IO;
 
 namespace ParkyAPI
 {
@@ -38,6 +40,30 @@ namespace ParkyAPI
             #endregion
 
             services.AddAutoMapper(typeof(AutoMappings));
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("ParkyOpenAPISpec", new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "Parky API",
+                    Version = "v1",
+                    Description = "Project Parky API",
+                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                    {
+                        Email = "itzmekarthik97@gmail.com",
+                        Name = "Karthik",
+                        Url = new Uri("https://www.google.com/")
+                    },
+                    License= new Microsoft.OpenApi.Models.OpenApiLicense()
+                    {
+                        Name="MIT License",
+                        Url = new Uri("https://en.wikipedia.org/wiki/MIT_License")
+                    }
+
+                });
+                var xmlCommentFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory,xmlCommentFile);
+                options.IncludeXmlComments(xmlCommentsFullPath);
+            });
             services.AddControllers();
         }
 
@@ -50,6 +76,14 @@ namespace ParkyAPI
             }
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/ParkyOpenAPISpec/swagger.json", "Parky API");
+                options.RoutePrefix = "";
+            });
 
             app.UseRouting();
 

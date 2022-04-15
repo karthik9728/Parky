@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ParkyAPI</name>
+    </assembly>
+    <members>
+        <member name="M:ParkyAPI.Controllers.NationalParkController.GetNationalParks">
+            <summary>
+            Get List of National Parks
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:ParkyAPI.Controllers.NationalParkController.GetNationalPark(System.Int32)">
+            <summary>
+            Get Individual National Park 
+            </summary>
+            <param name="id">Id of The National Park</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
