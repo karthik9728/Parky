@@ -37,6 +37,7 @@ namespace ParkyAPI
 
             #region
             services.AddScoped<INationalParkRepository, NationalParkRepository>();
+            services.AddScoped<ITrailRepository, TrailRepository>();
             #endregion
 
             services.AddAutoMapper(typeof(AutoMappings));
