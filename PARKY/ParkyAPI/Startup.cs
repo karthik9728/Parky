@@ -18,6 +18,10 @@ using AutoMapper;
 using ParkyAPI.Mapper;
 using System.Reflection;
 using System.IO;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using ParkyAPI.SwaggerOptions;
 
 namespace ParkyAPI
 {
@@ -41,35 +45,78 @@ namespace ParkyAPI
             #endregion
 
             services.AddAutoMapper(typeof(AutoMappings));
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("ParkyOpenAPISpec", new Microsoft.OpenApi.Models.OpenApiInfo()
-                {
-                    Title = "Parky API",
-                    Version = "v1",
-                    Description = "Project Parky API",
-                    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
-                    {
-                        Email = "itzmekarthik97@gmail.com",
-                        Name = "Karthik",
-                        Url = new Uri("https://www.google.com/")
-                    },
-                    License= new Microsoft.OpenApi.Models.OpenApiLicense()
-                    {
-                        Name="MIT License",
-                        Url = new Uri("https://en.wikipedia.org/wiki/MIT_License")
-                    }
 
-                });
-                var xmlCommentFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory,xmlCommentFile);
-                options.IncludeXmlComments(xmlCommentsFullPath);
+            #region Version Control
+
+            services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
             });
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+            });
+
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigSwaggerOptions>();
+            services.AddSwaggerGen();
+            #endregion
+
+            #region Swagger
+            //services.AddSwaggerGen(options =>
+            //{
+            //    options.SwaggerDoc("ParkyOpenAPISpec", new Microsoft.OpenApi.Models.OpenApiInfo()
+            //    {
+            //        Title = "Parky API",
+            //        Version = "1",
+            //        Description = "Project Parky API",
+            //        Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+            //        {
+            //            Email = "itzmekarthik97@gmail.com",
+            //            Name = "Karthik",
+            //            Url = new Uri("https://www.google.com/")
+            //        },
+            //        License = new Microsoft.OpenApi.Models.OpenApiLicense()
+            //        {
+            //            Name = "MIT License",
+            //            Url = new Uri("https://en.wikipedia.org/wiki/MIT_License")
+            //        }
+
+            //    });
+
+            //    #region Multiple Swagger Doc
+            //    //options.SwaggerDoc("ParkyOpenAPISpecTrail", new Microsoft.OpenApi.Models.OpenApiInfo()
+            //    //{
+            //    //    Title = "Parky API (Trail)",
+            //    //    Version = "1",
+            //    //    Description = "Project Parky API Trail",
+            //    //    Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+            //    //    {
+            //    //        Email = "itzmekarthik97@gmail.com",
+            //    //        Name = "Karthik",
+            //    //        Url = new Uri("https://www.google.com/")
+            //    //    },
+            //    //    License = new Microsoft.OpenApi.Models.OpenApiLicense()
+            //    //    {
+            //    //        Name = "MIT License",
+            //    //        Url = new Uri("https://en.wikipedia.org/wiki/MIT_License")
+            //    //    }
+
+            //    //});
+            //    #endregion
+
+            //    var xmlCommentFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            //    var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentFile);
+            //    options.IncludeXmlComments(xmlCommentsFullPath);
+            //});
+
+            #endregion
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -82,9 +129,19 @@ namespace ParkyAPI
 
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint("/swagger/ParkyOpenAPISpec/swagger.json", "Parky API");
+                foreach (var desc in provider.ApiVersionDescriptions)
+                {
+                    options.SwaggerEndpoint($"/swagger/{desc.GroupName}/swagger.json",desc.GroupName.ToUpperInvariant());
+                }
                 options.RoutePrefix = "";
             });
+
+            //app.UseSwaggerUI(options =>
+            //{
+            //    options.SwaggerEndpoint("/swagger/ParkyOpenAPISpec/swagger.json", "Parky API NP");
+            //    //options.SwaggerEndpoint("/swagger/ParkyOpenAPISpecTrail/swagger.json", "Parky API Trail");
+            //    options.RoutePrefix = "";
+            //});
 
             app.UseRouting();
 

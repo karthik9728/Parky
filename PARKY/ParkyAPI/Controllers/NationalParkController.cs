@@ -8,9 +8,11 @@ using System.Collections.Generic;
 
 namespace ParkyAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/nationalpark")]
+    //[Route("api/[controller]")]
     [ApiController]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    //[ApiExplorerSettings(GroupName = "ParkyOpenAPISpecNP")]
     public class NationalParkController : Controller
     {
         private readonly INationalParkRepository _nationalParkRepository;
